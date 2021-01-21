@@ -93,7 +93,7 @@ function establishPC(videoTag, stream, degradation) {
   if (degradation) {
      var sender = pc1.getSenders().find(function(s) {return s.track.kind == "video"});
      if(sender) {
-       var parameters = sender.getParameters
+       var parameters = sender.getParameters()
        console.log("parameters in",parameters);
        parameters.degradationPreference = "maintain-resolution";
        console.log("parameters out",parameters);
