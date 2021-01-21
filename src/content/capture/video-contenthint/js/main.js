@@ -65,16 +65,16 @@ function call() {
   // TODO(pbos): Remove fluid when no clients use it, motion is the newer name.
   //setVideoTrackContentHints(motionStream, 'fluid');
   setVideoTrackContentHints(motionStream, 'motion');
-  establishPC(motionVideo, motionStream);
+  establishPC(motionVideo, motionStream, false);
   detailStream = srcStream.clone();
   // TODO(pbos): Remove detailed when no clients use it, detail is the newer
   // name.
   //setVideoTrackContentHints(detailStream, 'detailed');
   setVideoTrackContentHints(detailStream, 'detail');
-  establishPC(detailVideo, detailStream);
+  establishPC(detailVideo, detailStream, true);
 }
 
-function establishPC(videoTag, stream) {
+function establishPC(videoTag, stream, degradation) {
   const pc1 = new RTCPeerConnection(null);
   const pc2 = new RTCPeerConnection(null);
   pc1.onicecandidate = e => {
@@ -90,6 +90,16 @@ function establishPC(videoTag, stream) {
   };
 
   stream.getTracks().forEach(track => pc1.addTrack(track, stream));
+  if (degradation) {
+     var sender = pc1.getSenders().find(function(s) {return s.track.kind == "video"});
+     if(sender) {
+       var parameters = sender.getParameters
+       console.log("parameters in",parameters);
+       parameters.degradationPreference = "maintain-resolution";
+       console.log("parameters out",parameters);
+       sender.setParameters(parameters);
+    }
+  }
 
   pc1.createOffer(offerOptions)
       .then(desc => {
